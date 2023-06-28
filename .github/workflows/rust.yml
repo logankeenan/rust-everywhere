@@ -16,6 +16,12 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+    - name: Prepare Database
+      run: |
+        cargo install sqlx-cli &&
+        cd api &&
+        . ./sqlx.sh database create &&
+        . ./sqlx.sh migrate run
     - name: Build
       run: cargo build --verbose
     - name: Run tests
