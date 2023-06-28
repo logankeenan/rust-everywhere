@@ -1,8 +1,9 @@
 use sqlx::FromRow;
 use chrono::NaiveDateTime;
+use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-#[derive(Debug, Clone, FromRow)]
+#[derive(Serialize, Deserialize, Debug, Clone, FromRow)]
 pub struct Note {
 		pub id: i64,
 		pub content: String,

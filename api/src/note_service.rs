@@ -2,6 +2,8 @@ use sqlx::{Pool, Sqlite};
 use uuid::Uuid;
 use crate::notes_model::Note;
 
+
+#[derive(Clone)]
 pub struct NoteService {
     connection: Pool<Sqlite>
 }
