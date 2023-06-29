@@ -2,3 +2,11 @@
 
 Basic api for CRUD operations of a note.
 
+## Tests
+
+**Unit**
+`cargo test`
+
+**Acceptance**
+`cargo buidl && . ./acceptance-test.sh`, note [jq](https://formulae.brew.sh/formula/jq) is required
+

@@ -4,7 +4,7 @@ mod notes_routes;
 mod axum_extractors;
 
 use axum::Router;
-use sqlx::{migrate::MigrateDatabase, Pool, Sqlite, sqlite::SqlitePoolOptions};
+use sqlx::{Pool, Sqlite, sqlite::SqlitePoolOptions};
 use std::net::SocketAddr;
 use crate::notes_routes::notes_routes;
 
@@ -15,19 +15,9 @@ pub struct AppState {
 
 #[tokio::main]
 async fn main() -> Result<(), sqlx::Error> {
-    let db_location = "./sqlite.db";
-
-    if !Sqlite::database_exists(db_location).await? {
-        Sqlite::create_database(db_location).await?
-    }
-
     let pool: Pool<Sqlite> = SqlitePoolOptions::new()
         .max_connections(5)
-        .connect(db_location).await?;
-
-    sqlx::migrate!()
-        .run(&pool)
-        .await?;
+        .connect("./sqlite.db").await?;
 
     let state = AppState {
         pool,
