@@ -8,5 +8,5 @@ Basic api for CRUD operations of a note.
 `cargo test`
 
 **Acceptance**
-`cargo buidl && . ./acceptance-test.sh`, note [jq](https://formulae.brew.sh/formula/jq) is required
+`cargo build && . ./acceptance-test.sh`, note [jq](https://formulae.brew.sh/formula/jq) is required
 
