@@ -36,11 +36,8 @@ nohup cargo run > /dev/null 2>&1 &
 # Save the PID of the server process
 SERVER_PID=$!
 
-# Trap to ensure that the server is killed when the script exits
-trap 'kill -9 $SERVER_PID' EXIT
-
 # Allow server to start
-sleep 1
+sleep 5
 
 echo "Testing POST /notes"
 response=$(curl -H "user-id: $USER_ID" -H "Content-Type: application/json" -X POST -d "$TEST_NOTE" -v "$BASE_URL/notes" 2>&1)
@@ -79,4 +76,25 @@ if [ $num_notes -ne 1 ]; then
     exit 1
 fi
 echo
+
+echo "Testing POST /notes for searchable note"
+response=$(curl -H "user-id: $USER_ID" -H "Content-Type: application/json" -X POST -d "$SEARCH_NOTE" -v "$BASE_URL/notes" 2>&1)
+status_code=$(extract_status_code "$response")
+assert_status_code $status_code
+search_note_id=$(echo $response | jq -r '.id')
+echo
+
+echo "Testing GET /notes?q=should"
+response=$(curl -H "user-id: $USER_ID" -G -d "q=should" -v "$BASE_URL/notes" 2>&1)
+status_code=$(extract_status_code "$response")
+assert_status_code $status_code
+# Check the number of notes is as expected
+num_notes=$(count_notes "$response")
+if [ $num_notes -ne 1 ]; then
+    echo "Expected 1 note, but got $num_notes"
+    kill -9 $SERVER_PID
+    exit 1
+fi
+echo
+
 kill -9 $SERVER_PID

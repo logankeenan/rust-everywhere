@@ -1,6 +1,6 @@
 use std::time::Duration;
 use axum::body::Body;
-use axum::extract::{Path};
+use axum::extract::{Path, Query};
 use axum::response::{IntoResponse, Response};
 use axum::{Json, Router};
 use axum::http::{HeaderMap, StatusCode};
@@ -30,11 +30,24 @@ struct NoteForm {
     content: String,
 }
 
+#[derive(Deserialize)]
+struct SearchQuery {
+    q: Option<String>,
+}
+
 async fn all(note_service: NoteService,
-             user_id: UserId) -> Response {
-    match note_service.all_notes(user_id.0).await {
-        Ok(notes) => (StatusCode::OK, Json(notes)).into_response(),
-        Err(_) => (StatusCode::INTERNAL_SERVER_ERROR).into_response(),
+             user_id: UserId,
+             Query(search_query): Query<SearchQuery>) -> Response {
+    if let Some(query) = &search_query.q {
+        match note_service.search_notes(user_id.0, query.clone()).await {
+            Ok(notes) => (StatusCode::OK, Json(notes)).into_response(),
+            Err(_) => (StatusCode::INTERNAL_SERVER_ERROR).into_response(),
+        }
+    } else {
+        match note_service.all_notes(user_id.0).await {
+            Ok(notes) => (StatusCode::OK, Json(notes)).into_response(),
+            Err(_) => (StatusCode::INTERNAL_SERVER_ERROR).into_response(),
+        }
     }
 }
 
@@ -57,7 +70,7 @@ async fn create(note_service: NoteService,
                     delete_note_after_15_mins(note_service.clone(), note.id, user_id.0);
 
                     (StatusCode::CREATED, Json(note)).into_response()
-                },
+                }
                 Err(_) => (StatusCode::INTERNAL_SERVER_ERROR).into_response(),
             }
         }
@@ -87,7 +100,7 @@ async fn update(note_service: NoteService,
                     headers.insert(LOCATION, format!("/notes/{}", id).parse().unwrap());
 
                     (StatusCode::NO_CONTENT, headers).into_response()
-                },
+                }
                 Err(_) => (StatusCode::INTERNAL_SERVER_ERROR).into_response(),
             }
         }
