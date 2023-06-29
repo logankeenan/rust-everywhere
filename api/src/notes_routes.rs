@@ -1,3 +1,4 @@
+use std::time::Duration;
 use axum::body::Body;
 use axum::extract::{Path};
 use axum::response::{IntoResponse, Response};
@@ -9,6 +10,8 @@ use crate::AppState;
 use crate::axum_extractors::UserId;
 use crate::note_service::NoteService;
 use serde::Deserialize;
+use tokio::time::sleep;
+use uuid::Uuid;
 use validator::{Validate};
 
 pub fn notes_routes(state: AppState) -> Router<AppState, Body> {
@@ -50,12 +53,26 @@ async fn create(note_service: NoteService,
     match payload.validate() {
         Ok(_) => {
             match note_service.create_note(payload.content.clone(), user_id.0).await {
-                Ok(note) => (StatusCode::CREATED, Json(note)).into_response(),
+                Ok(note) => {
+                    delete_note_after_15_mins(note_service.clone(), note.id, user_id.0);
+
+                    (StatusCode::CREATED, Json(note)).into_response()
+                },
                 Err(_) => (StatusCode::INTERNAL_SERVER_ERROR).into_response(),
             }
         }
         Err(errors) => (StatusCode::INTERNAL_SERVER_ERROR, errors.to_string()).into_response()
     }
+}
+
+fn delete_note_after_15_mins(cloned_service: NoteService, note_id: i64, user_id: Uuid) {
+    tokio::spawn(async move {
+        sleep(Duration::from_secs(15 * 60)).await;
+        match cloned_service.delete_by_id(note_id, user_id).await {
+            Ok(_) => (),
+            Err(_) => eprintln!("Error deleting note after 15 minutes"),
+        }
+    });
 }
 
 async fn update(note_service: NoteService,

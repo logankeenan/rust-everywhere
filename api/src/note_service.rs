@@ -104,6 +104,21 @@ impl NoteService {
 
         Ok(notes)
     }
+
+    pub async fn delete_by_id(&self, id: i64, user_id: Uuid) -> Result<(), sqlx::Error>  {
+        sqlx::query!(
+            r#"
+                DELETE FROM notes
+                WHERE id = ? AND user_id = ?
+            "#,
+            id,
+            user_id
+        )
+            .execute(&self.connection).await?;
+
+        Ok(())
+    }
+
 }
 
 #[cfg(test)]
@@ -185,5 +200,20 @@ mod tests {
 
         let notes = service.search_notes(user_id, "note".to_string()).await.unwrap();
         assert_eq!(notes.len(), 2);
+    }
+
+    #[tokio::test]
+    async fn test_delete_note() {
+        let pool = setup_db().await;
+
+        let service = NoteService::new(pool.clone());
+
+        let user_id = Uuid::new_v4();
+        let note = service.create_note("Test content".to_string(), user_id).await.unwrap();
+
+        assert!(service.delete_by_id(note.id, user_id).await.is_ok());
+
+        let result = service.by_id(note.id, user_id).await;
+        assert!(result.is_err());
     }
 }
