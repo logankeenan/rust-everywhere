@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% include "components/nav-bar.html" %}
+<div class="container">
+		<h1 class="mb-5">Search results for: <i>{{search}}</i></h1>
+
+		{% for note in filtered_notes %}
+		<div class="mb-4">
+				<section style="max-height: 150px; overflow: hidden;">
+						{{note.preview.to_string() | safe }}
+				</section>
+				<br>
+				<a href="/show/{{note.id}}">View More</a>
+		</div>
+		{% endfor %}
+</div>
+
+
+{% endblock %}
