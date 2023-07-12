@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% include "components/nav-bar.html" %}
+<div class="container">
+    <div class="row">
+        <div class="col-lg-8 mx-auto d-flex justify-content-end">
+            <a class="btn btn-sm btn-primary mb-2" href="/edit/{{selected_note.id}}">Edit</a>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-8 mx-auto ">
+            {{ preview.to_string() | safe }}
+        </div>
+    </div>
+</div>
+{% endblock %}

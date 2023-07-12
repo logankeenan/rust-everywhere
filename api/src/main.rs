@@ -31,6 +31,10 @@ async fn main() -> Result<(), sqlx::Error> {
         .max_connections(5)
         .connect(db_location).await?;
 
+    sqlx::migrate!()
+        .run(&pool)
+        .await?;
+
     let state = AppState {
         pool,
     };
