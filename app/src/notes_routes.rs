@@ -110,7 +110,7 @@ fn first_20_chars(markdown_input: &str) -> String {
 
 pub async fn index(
     user_id: UserId,
-    note_service: NotesService
+    note_service: NotesService,
 ) -> impl IntoResponse {
     let notes = note_service.all_notes(user_id.0).await.unwrap();
 
@@ -123,7 +123,7 @@ pub async fn index(
 pub async fn create_note(
     user_id: UserId,
     note_service: NotesService,
-    note_form: Form<NoteForm>
+    note_form: Form<NoteForm>,
 ) -> impl IntoResponse {
     let mut note_form = note_form.0;
 
@@ -193,7 +193,7 @@ pub async fn update_note(
 pub async fn show_note(
     Path(id): Path<i64>,
     user_id: UserId,
-    note_service: NotesService
+    note_service: NotesService,
 ) -> impl IntoResponse {
     let notes = note_service.all_notes(user_id.0).await.unwrap();
     let note_by_id = note_service.by_id(id, user_id.0).await;
@@ -234,7 +234,7 @@ pub struct ShowTemplate {
 pub async fn edit_note(
     Path(id): Path<i64>,
     user_id: UserId,
-    note_service: NotesService
+    note_service: NotesService,
 ) -> impl IntoResponse {
     let notes = note_service.all_notes(user_id.0).await.unwrap();
     let note_by_id = notes.iter().find(|note| note.id == id).cloned();
@@ -275,7 +275,7 @@ pub struct SearchQuery {
 pub async fn search_note(
     Query(SearchQuery { search }): Query<SearchQuery>,
     user_id: UserId,
-    note_service: NotesService
+    note_service: NotesService,
 ) -> impl IntoResponse {
     let notes = note_service.all_notes(user_id.0).await.unwrap();
 

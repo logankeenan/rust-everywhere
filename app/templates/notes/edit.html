@@ -3,43 +3,46 @@
 {% block content %}
 {% include "components/nav-bar.html" %}
 <div class="container">
-		<form action="/update" method="post" class="needs-validation" novalidate>
+    <form action="/update" method="post" class="needs-validation" novalidate>
 
-				<div class="row">
-						<div class="col-lg-8 mx-auto d-flex justify-content-end">
-								<button type="submit" class="btn btn-sm btn-primary mb-2">Save</button>
-						</div>
-				</div>
+        <div class="row">
+            <div class="col-lg-8 mx-auto d-flex justify-content-end">
+                <button type="submit" class="btn btn-sm btn-primary mb-2">Save</button>
+            </div>
+        </div>
 
-				{% if note_form.id.is_some() %}
-				<input type="hidden" name="id" value="{{ note_form.id.unwrap() }}">
-				{% endif %}
+        {% if note_form.id.is_some() %}
+        <input type="hidden" name="id" value="{{ note_form.id.unwrap() }}">
+        {% endif %}
 
-				<div class="row">
-						<div class="col-lg-8 mx-auto">
-								<div class="mb-2">
-										<markdown-toolbar for="content">
-												<md-bold class="btn btn-sm btn-outline-secondary"><i class="bi bi-type-bold"></i></md-bold>
-												<md-header class="btn btn-sm btn-outline-secondary"><i class="bi bi-type-h1"></i></md-header>
-												<md-italic class="btn btn-sm btn-outline-secondary"><i class="bi bi-type-italic"></i></md-italic>
-												<md-quote class="btn btn-sm btn-outline-secondary"><i class="bi bi-quote"></i></md-quote>
-												<md-code class="btn btn-sm btn-outline-secondary"><i class="bi bi-code-slash"></i></md-code>
-												<md-link class="btn btn-sm btn-outline-secondary"><i class="bi bi-link"></i></md-link>
-												<md-image class="btn btn-sm btn-outline-secondary"><i class="bi bi-image"></i></md-image>
-												<md-unordered-list class="btn btn-sm btn-outline-secondary"><i class="bi bi-list-ul"></i></md-unordered-list>
-												<md-ordered-list class="btn btn-sm btn-outline-secondary"><i class="bi bi-list-ol"></i></md-ordered-list>
-										</markdown-toolbar>
-								</div>
-								<textarea name="content"
-													id="content"
-													rows="15"
-													class="w-100 form-control {% if note_form.content_error.is_some() %}is-invalid{% endif %}">{{ note_form.content }}</textarea>
-								{% if note_form.content_error.is_some() %}
-								<div class="invalid-feedback">{{ note_form.content_error.as_ref().unwrap() }}</div>
-								{% endif %}
-						</div>
-				</div>
-		</form>
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="mb-2">
+                    <markdown-toolbar for="content">
+                        <md-bold class="btn btn-sm btn-outline-secondary"><i class="bi bi-type-bold"></i></md-bold>
+                        <md-header class="btn btn-sm btn-outline-secondary"><i class="bi bi-type-h1"></i></md-header>
+                        <md-italic class="btn btn-sm btn-outline-secondary"><i class="bi bi-type-italic"></i>
+                        </md-italic>
+                        <md-quote class="btn btn-sm btn-outline-secondary"><i class="bi bi-quote"></i></md-quote>
+                        <md-code class="btn btn-sm btn-outline-secondary"><i class="bi bi-code-slash"></i></md-code>
+                        <md-link class="btn btn-sm btn-outline-secondary"><i class="bi bi-link"></i></md-link>
+                        <md-image class="btn btn-sm btn-outline-secondary"><i class="bi bi-image"></i></md-image>
+                        <md-unordered-list class="btn btn-sm btn-outline-secondary"><i class="bi bi-list-ul"></i>
+                        </md-unordered-list>
+                        <md-ordered-list class="btn btn-sm btn-outline-secondary"><i class="bi bi-list-ol"></i>
+                        </md-ordered-list>
+                    </markdown-toolbar>
+                </div>
+                <textarea name="content"
+                          id="content"
+                          rows="15"
+                          class="w-100 form-control {% if note_form.content_error.is_some() %}is-invalid{% endif %}">{{ note_form.content }}</textarea>
+                {% if note_form.content_error.is_some() %}
+                <div class="invalid-feedback">{{ note_form.content_error.as_ref().unwrap() }}</div>
+                {% endif %}
+            </div>
+        </div>
+    </form>
 </div>
 
 
