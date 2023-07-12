@@ -2,5 +2,6 @@
 
 members = [
     "api",
-    "app"
+    "app",
+    "server-side"
 ]

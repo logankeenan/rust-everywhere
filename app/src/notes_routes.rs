@@ -1,16 +1,16 @@
 use askama_axum::Template;
 use axum::{
-		body::Body,
-		response::{IntoResponse, Response},
-		Form,
-		extract::Path,
+    body::Body,
+    response::{IntoResponse, Response},
+    Form,
+    extract::Path,
 };
 use axum::extract::Query;
 use pulldown_cmark::{Event, html, Options, Parser};
 use serde::{Deserialize, Serialize};
 use crate::{
-		notes_model::Note,
-		notes_service::NotesService,
+    notes_model::Note,
+    notes_service::NotesService,
 };
 
 use validator::{Validate};
@@ -18,296 +18,297 @@ use crate::axum_extractors::UserId;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct NoteListItem {
-		pub id: i64,
-		pub title: String,
+    pub id: i64,
+    pub title: String,
 }
 
 impl NoteListItem {
-		pub fn from(note: &Note) -> Self {
-				NoteListItem {
-						id: note.id,
-						title: first_20_chars(&note.content),
-				}
-		}
+    pub fn from(note: &Note) -> Self {
+        NoteListItem {
+            id: note.id,
+            title: first_20_chars(&note.content),
+        }
+    }
 }
 
 #[derive(Validate, Debug, Serialize, Deserialize, Clone, Default)]
 pub struct NoteForm {
-		pub id: Option<i64>,
+    pub id: Option<i64>,
 
-		#[validate(length(min = 1, message = "Content is too short. It must be at least 1 characters long."))]
-		#[validate(length(max = 1000, message = "Content is too long. It must be no more than 1000 characters long."))]
-		pub content: String,
+    #[validate(length(min = 1, message = "Content is too short. It must be at least 1 characters long."))]
+    #[validate(length(max = 1000, message = "Content is too long. It must be no more than 1000 characters long."))]
+    pub content: String,
 
-		pub content_error: Option<String>,
+    pub content_error: Option<String>,
 }
 
 impl NoteForm {
-		pub fn from(note: &Note) -> Self {
-				NoteForm {
-						id: Some(note.id),
-						content: note.content.clone(),
-						content_error: None,
-				}
-		}
+    pub fn from(note: &Note) -> Self {
+        NoteForm {
+            id: Some(note.id),
+            content: note.content.clone(),
+            content_error: None,
+        }
+    }
 }
 
 
 impl NoteForm {
-		pub fn is_valid(&mut self) -> bool {
-				let result = self.validate();
-				if result.is_err() {
-						self.content_error = Some(result.unwrap_err().to_string());
-						false
-				} else {
-						self.content_error = None;
-						true
-				}
-		}
+    pub fn is_valid(&mut self) -> bool {
+        let result = self.validate();
+        if result.is_err() {
+            self.content_error = Some(result.unwrap_err().to_string());
+            false
+        } else {
+            self.content_error = None;
+            true
+        }
+    }
 }
 
 #[derive(Template)]
 #[template(path = "notes/index.html")]
 pub struct IndexTemplate {
-		pub note_list: Vec<NoteListItem>,
-		pub note_form: NoteForm,
+    pub note_list: Vec<NoteListItem>,
+    pub note_form: NoteForm,
 }
 
 fn content_to_markdown(content: &str) -> String {
-		let parser = Parser::new(content);
-		let mut markdown_output = String::new();
+    let parser = Parser::new(content);
+    let mut markdown_output = String::new();
 
-		let filtered_parser = parser.into_iter().filter(|event| {
-				!matches!(event, Event::Html(ref html) | Event::Html(ref html) if html.contains("<script"))
-		});
+    let filtered_parser = parser.into_iter().filter(|event| {
+        !matches!(event, Event::Html(ref html) | Event::Html(ref html) if html.contains("<script"))
+    });
 
-		html::push_html(&mut markdown_output, filtered_parser);
-		markdown_output
+    html::push_html(&mut markdown_output, filtered_parser);
+    markdown_output
 }
 
 fn first_20_chars(markdown_input: &str) -> String {
-		let mut options = Options::empty();
-		options.insert(Options::ENABLE_STRIKETHROUGH);
-		let parser = Parser::new_ext(markdown_input, options);
+    let mut options = Options::empty();
+    options.insert(Options::ENABLE_STRIKETHROUGH);
+    let parser = Parser::new_ext(markdown_input, options);
 
-		let mut plain_text = String::new();
-		const LENGTH: usize = 20;
+    let mut plain_text = String::new();
+    const LENGTH: usize = 20;
 
-		for event in parser {
-				match event {
-						Event::Text(text) => plain_text.push_str(&text),
-						Event::Code(code) => plain_text.push_str(&code),
-						_ => {}
-				}
-				if plain_text.len() >= LENGTH {
-						break;
-				}
-		}
+    for event in parser {
+        match event {
+            Event::Text(text) => plain_text.push_str(&text),
+            Event::Code(code) => plain_text.push_str(&code),
+            _ => {}
+        }
+        if plain_text.len() >= LENGTH {
+            break;
+        }
+    }
 
-		plain_text.truncate(LENGTH);
-		plain_text
+    plain_text.truncate(LENGTH);
+    plain_text
 }
 
 pub async fn index(
-		user_id: UserId,
+    user_id: UserId,
 ) -> impl IntoResponse {
-		let notes = NotesService::new().all_notes(user_id.0).await.unwrap();
+    let notes = NotesService::new().all_notes(user_id.0).await.unwrap();
 
-		IndexTemplate {
-				note_list: notes.iter().map(NoteListItem::from).collect(),
-				note_form: NoteForm::default(),
-		}
+    IndexTemplate {
+        note_list: notes.iter().map(NoteListItem::from).collect(),
+        note_form: NoteForm::default(),
+    }
 }
 
 pub async fn create_note(
-		user_id: UserId,
-		note_form: Form<NoteForm>,
+    user_id: UserId,
+    note_form: Form<NoteForm>,
 ) -> impl IntoResponse {
-		let mut note_form = note_form.0;
+    let mut note_form = note_form.0;
 
-		if !note_form.is_valid() {
-				let notes = NotesService::new().all_notes(user_id.0).await.unwrap();
+    if !note_form.is_valid() {
+        let notes = NotesService::new().all_notes(user_id.0).await.unwrap();
 
-				let index_template = IndexTemplate {
-						note_list: notes.iter().map(NoteListItem::from).collect(),
-						note_form,
-				};
+        let index_template = IndexTemplate {
+            note_list: notes.iter().map(NoteListItem::from).collect(),
+            note_form,
+        };
 
-				let html = index_template.render().unwrap();
+        let html = index_template.render().unwrap();
 
-				Response::builder()
-						.status(200)
-						.body(html.into())
-						.unwrap()
-		} else {
-				let note = NotesService::new().create_note(
-						note_form.content,
-						user_id.0,
-				).await.unwrap();
+        Response::builder()
+            .status(200)
+            .body(html.into())
+            .unwrap()
+    } else {
+        let note = NotesService::new().create_note(
+            note_form.content,
+            user_id.0,
+        ).await.unwrap();
 
-				let location = format!("/show/{}", note.id);
+        let location = format!("/show/{}", note.id);
 
-				Response::builder()
-						.header("Location", location)
-						.status(303)
-						.body(Body::empty())
-						.unwrap()
-		}
+        Response::builder()
+            .header("Location", location)
+            .status(303)
+            .body(Body::empty())
+            .unwrap()
+    }
 }
 
 pub async fn update_note(
-		user_id: UserId,
-		note_form: Form<NoteForm>,
+    user_id: UserId,
+    note_form: Form<NoteForm>,
 ) -> impl IntoResponse {
-		let mut note_form = note_form.0;
-		if !note_form.is_valid() {
-				let notes = NotesService::new().all_notes(user_id.0).await.unwrap();
+    let mut note_form = note_form.0;
+    if !note_form.is_valid() {
+        let notes = NotesService::new().all_notes(user_id.0).await.unwrap();
 
-				let index_template = IndexTemplate {
-						note_list: notes.iter().map(NoteListItem::from).collect(),
-						note_form,
-				};
+        let index_template = IndexTemplate {
+            note_list: notes.iter().map(NoteListItem::from).collect(),
+            note_form,
+        };
 
-				let html = index_template.render().unwrap();
+        let html = index_template.render().unwrap();
 
-				Response::builder()
-						.status(200)
-						.body(html.into())
-						.unwrap()
-		} else {
-				let note = NotesService::new().update_note(note_form.content, note_form.id.unwrap(), user_id.0).await.unwrap();
-				let location = format!("/show/{}", note.id);
+        Response::builder()
+            .status(200)
+            .body(html.into())
+            .unwrap()
+    } else {
+        let note_id = note_form.id.unwrap();
+        NotesService::new().update_note(note_form.content, note_id, user_id.0).await.unwrap();
+        let location = format!("/show/{}", note_id);
 
-				Response::builder()
-						.header("Location", location)
-						.status(303)
-						.body(Body::empty())
-						.unwrap()
-		}
+        Response::builder()
+            .header("Location", location)
+            .status(303)
+            .body(Body::empty())
+            .unwrap()
+    }
 }
 
 pub async fn show_note(
-		Path(id): Path<i64>,
-		user_id: UserId,
+    Path(id): Path<i64>,
+    user_id: UserId,
 ) -> impl IntoResponse {
-		let notes = NotesService::new().all_notes(user_id.0).await.unwrap();
-		let note_by_id = notes.iter().find(|note| note.id == id).cloned();
+    let notes = NotesService::new().all_notes(user_id.0).await.unwrap();
+    let note_by_id = NotesService::new().by_id(id, user_id.0).await;
 
-		if let Some(note) = note_by_id {
-				let preview = content_to_markdown(&note.content);
+    if let Ok(note) = note_by_id {
+        let preview = content_to_markdown(&note.content);
 
-				let show_template = ShowTemplate {
-						note_list: notes.iter().map(NoteListItem::from).collect(),
-						preview,
-						selected_note: note,
-				};
+        let show_template = ShowTemplate {
+            note_list: notes.iter().map(NoteListItem::from).collect(),
+            preview,
+            selected_note: note,
+        };
 
-				let html: String = show_template.render().unwrap();
+        let html: String = show_template.render().unwrap();
 
-				Response::builder()
-						.status(200)
-						.body(html.into())
-						.unwrap()
-		} else {
-				Response::builder()
-						.status(404)
-						.body(Body::from("Note not found"))
-						.unwrap()
-		}
+        Response::builder()
+            .status(200)
+            .body(html.into())
+            .unwrap()
+    } else {
+        Response::builder()
+            .status(404)
+            .body(Body::from("Note not found"))
+            .unwrap()
+    }
 }
 
 
 #[derive(Template)]
 #[template(path = "notes/show.html")]
 pub struct ShowTemplate {
-		pub note_list: Vec<NoteListItem>,
-		pub preview: String,
-		pub selected_note: Note,
+    pub note_list: Vec<NoteListItem>,
+    pub preview: String,
+    pub selected_note: Note,
 }
 
 
 pub async fn edit_note(
-		Path(id): Path<i64>,
-		user_id: UserId,
+    Path(id): Path<i64>,
+    user_id: UserId,
 ) -> impl IntoResponse {
-		let notes = NotesService::new().all_notes(user_id.0).await.unwrap();
-		let note_by_id = notes.iter().find(|note| note.id == id).cloned();
+    let notes = NotesService::new().all_notes(user_id.0).await.unwrap();
+    let note_by_id = notes.iter().find(|note| note.id == id).cloned();
 
-		if let Some(note) = note_by_id {
-				let show_template = EditTemplate {
-						note_list: notes.iter().map(NoteListItem::from).collect(),
-						note_form: NoteForm::from(&note),
-				};
+    if let Some(note) = note_by_id {
+        let show_template = EditTemplate {
+            note_list: notes.iter().map(NoteListItem::from).collect(),
+            note_form: NoteForm::from(&note),
+        };
 
-				let html: String = show_template.render().unwrap();
+        let html: String = show_template.render().unwrap();
 
-				Response::builder()
-						.status(200)
-						.body(html.into())
-						.unwrap()
-		} else {
-				Response::builder()
-						.status(404)
-						.body(Body::from("Note not found"))
-						.unwrap()
-		}
+        Response::builder()
+            .status(200)
+            .body(html.into())
+            .unwrap()
+    } else {
+        Response::builder()
+            .status(404)
+            .body(Body::from("Note not found"))
+            .unwrap()
+    }
 }
 
 #[derive(Template)]
 #[template(path = "notes/edit.html")]
 pub struct EditTemplate {
-		pub note_list: Vec<NoteListItem>,
-		pub note_form: NoteForm,
+    pub note_list: Vec<NoteListItem>,
+    pub note_form: NoteForm,
 }
 
 
 #[derive(Deserialize)]
 pub struct SearchQuery {
-		search: String,
+    search: String,
 }
 
 pub async fn search_note(
-		Query(SearchQuery { search }): Query<SearchQuery>,
-		user_id: UserId,
+    Query(SearchQuery { search }): Query<SearchQuery>,
+    user_id: UserId,
 ) -> impl IntoResponse {
-		let notes = NotesService::new().all_notes(user_id.0).await.unwrap();
+    let notes = NotesService::new().all_notes(user_id.0).await.unwrap();
 
-		let filtered_notes: Vec<NoteSearchPreview> = notes
-				.iter()
-				.filter(|note| note.content.to_lowercase().contains(&search.to_lowercase()))
-				.map(|note| {
-						let preview = content_to_markdown(&note.content);
-						NoteSearchPreview {
-								id: note.id,
-								preview,
-						}
-				})
-				.collect();
+    let filtered_notes: Vec<NoteSearchPreview> = notes
+        .iter()
+        .filter(|note| note.content.to_lowercase().contains(&search.to_lowercase()))
+        .map(|note| {
+            let preview = content_to_markdown(&note.content);
+            NoteSearchPreview {
+                id: note.id,
+                preview,
+            }
+        })
+        .collect();
 
-		let search_template = SearchTemplate {
-				note_list: notes.iter().map(NoteListItem::from).collect(),
-				filtered_notes,
-				search,
-		};
-		let html = search_template.render().unwrap();
+    let search_template = SearchTemplate {
+        note_list: notes.iter().map(NoteListItem::from).collect(),
+        filtered_notes,
+        search,
+    };
+    let html = search_template.render().unwrap();
 
-		Response::builder()
-				.status(200)
-				.body(html)
-				.unwrap()
+    Response::builder()
+        .status(200)
+        .body(html)
+        .unwrap()
 }
 
 pub struct NoteSearchPreview {
-		pub id: i64,
-		pub preview: String
+    pub id: i64,
+    pub preview: String,
 }
 
 
 #[derive(Template)]
 #[template(path = "notes/search.html")]
 pub struct SearchTemplate {
-		pub note_list: Vec<NoteListItem>,
-		pub filtered_notes: Vec<NoteSearchPreview>,
-		pub search: String
+    pub note_list: Vec<NoteListItem>,
+    pub filtered_notes: Vec<NoteSearchPreview>,
+    pub search: String,
 }
 

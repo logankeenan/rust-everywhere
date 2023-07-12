@@ -12,11 +12,11 @@ pub struct NotesService {
 impl NotesService {
     pub fn new() -> Self {
         let base_url = env::var("BASE_URL")
-            .unwrap_or_else(|_| String::from("http://localhost:8000"));
+            .unwrap_or_else(|_| String::from("http://localhost:3000"));
 
         NotesService {
             client: Client::new(),
-            base_url
+            base_url,
         }
     }
 
@@ -35,10 +35,24 @@ impl NotesService {
         self.fetch_notes("notes", user_id).await
     }
 
-    pub async fn by_id(&self, id: Uuid, user_id: Uuid) -> reqwest::Result<Option<Note>> {
+    pub async fn by_id(&self, id: i64, user_id: Uuid) -> reqwest::Result<Note> {
         let path = format!("notes/{}", id);
-        self.fetch_notes(&path, user_id).await
-            .map(|notes| notes.into_iter().next())
+
+        let url = format!("{}/{}", self.base_url, path);
+        let user_id = user_id.to_string();
+        match self.client.get(&url)
+            .header("user-id", HeaderValue::from_str(&user_id).unwrap())
+            .send()
+            .await {
+            Ok(x) => {
+                let result = x.json::<Note>()
+                    .await;
+                result
+            }
+            Err(err) => {
+                Err(err)
+            }
+        }
     }
 
     pub async fn update_note(
@@ -46,16 +60,16 @@ impl NotesService {
         content: String,
         note_id: i64,
         user_id: Uuid,
-    ) -> reqwest::Result<Note> {
+    ) -> reqwest::Result<()> {
         let url = format!("{}/notes/{}", self.base_url, note_id);
         let user_id = user_id.to_string();
         self.client.patch(&url)
             .header("user-id", HeaderValue::from_str(&user_id).unwrap())
             .json(&serde_json::json!({ "content": content }))
             .send()
-            .await?
-            .json::<Note>()
-            .await
+            .await?;
+
+        Ok(())
     }
 
     pub async fn create_note(
@@ -73,5 +87,4 @@ impl NotesService {
             .json::<Note>()
             .await
     }
-
 }
