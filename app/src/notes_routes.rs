@@ -110,8 +110,9 @@ fn first_20_chars(markdown_input: &str) -> String {
 
 pub async fn index(
     user_id: UserId,
+    note_service: NotesService
 ) -> impl IntoResponse {
-    let notes = NotesService::new().all_notes(user_id.0).await.unwrap();
+    let notes = note_service.all_notes(user_id.0).await.unwrap();
 
     IndexTemplate {
         note_list: notes.iter().map(NoteListItem::from).collect(),
@@ -121,12 +122,13 @@ pub async fn index(
 
 pub async fn create_note(
     user_id: UserId,
-    note_form: Form<NoteForm>,
+    note_service: NotesService,
+    note_form: Form<NoteForm>
 ) -> impl IntoResponse {
     let mut note_form = note_form.0;
 
     if !note_form.is_valid() {
-        let notes = NotesService::new().all_notes(user_id.0).await.unwrap();
+        let notes = note_service.all_notes(user_id.0).await.unwrap();
 
         let index_template = IndexTemplate {
             note_list: notes.iter().map(NoteListItem::from).collect(),
@@ -140,7 +142,7 @@ pub async fn create_note(
             .body(html.into())
             .unwrap()
     } else {
-        let note = NotesService::new().create_note(
+        let note = note_service.create_note(
             note_form.content,
             user_id.0,
         ).await.unwrap();
@@ -157,11 +159,12 @@ pub async fn create_note(
 
 pub async fn update_note(
     user_id: UserId,
+    note_service: NotesService,
     note_form: Form<NoteForm>,
 ) -> impl IntoResponse {
     let mut note_form = note_form.0;
     if !note_form.is_valid() {
-        let notes = NotesService::new().all_notes(user_id.0).await.unwrap();
+        let notes = note_service.all_notes(user_id.0).await.unwrap();
 
         let index_template = IndexTemplate {
             note_list: notes.iter().map(NoteListItem::from).collect(),
@@ -176,7 +179,7 @@ pub async fn update_note(
             .unwrap()
     } else {
         let note_id = note_form.id.unwrap();
-        NotesService::new().update_note(note_form.content, note_id, user_id.0).await.unwrap();
+        note_service.update_note(note_form.content, note_id, user_id.0).await.unwrap();
         let location = format!("/show/{}", note_id);
 
         Response::builder()
@@ -190,9 +193,10 @@ pub async fn update_note(
 pub async fn show_note(
     Path(id): Path<i64>,
     user_id: UserId,
+    note_service: NotesService
 ) -> impl IntoResponse {
-    let notes = NotesService::new().all_notes(user_id.0).await.unwrap();
-    let note_by_id = NotesService::new().by_id(id, user_id.0).await;
+    let notes = note_service.all_notes(user_id.0).await.unwrap();
+    let note_by_id = note_service.by_id(id, user_id.0).await;
 
     if let Ok(note) = note_by_id {
         let preview = content_to_markdown(&note.content);
@@ -230,8 +234,9 @@ pub struct ShowTemplate {
 pub async fn edit_note(
     Path(id): Path<i64>,
     user_id: UserId,
+    note_service: NotesService
 ) -> impl IntoResponse {
-    let notes = NotesService::new().all_notes(user_id.0).await.unwrap();
+    let notes = note_service.all_notes(user_id.0).await.unwrap();
     let note_by_id = notes.iter().find(|note| note.id == id).cloned();
 
     if let Some(note) = note_by_id {
@@ -270,8 +275,9 @@ pub struct SearchQuery {
 pub async fn search_note(
     Query(SearchQuery { search }): Query<SearchQuery>,
     user_id: UserId,
+    note_service: NotesService
 ) -> impl IntoResponse {
-    let notes = NotesService::new().all_notes(user_id.0).await.unwrap();
+    let notes = note_service.all_notes(user_id.0).await.unwrap();
 
     let filtered_notes: Vec<NoteSearchPreview> = notes
         .iter()

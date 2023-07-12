@@ -7,6 +7,7 @@ use axum::{
 		async_trait
 };
 use uuid::Uuid;
+use crate::notes_service::NotesService;
 
 #[derive(Debug, Clone, Default)]
 pub struct UserId(pub Uuid);
@@ -40,4 +41,17 @@ impl<S> FromRequestParts<S> for UserId
 				}
 		}
 }
+
+#[async_trait]
+impl<S> FromRequestParts<S> for NotesService
+	where
+		S: Send + Sync,
+{
+	type Rejection = http::StatusCode;
+
+	async fn from_request_parts(_parts: &mut Parts, _state: &S) -> Result<Self, Self::Rejection> {
+		Ok(NotesService::new())
+	}
+}
+
 
