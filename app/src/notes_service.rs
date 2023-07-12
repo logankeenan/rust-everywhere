@@ -4,10 +4,10 @@ use reqwest::Client;
 use http::header::HeaderValue;
 
 
-#[cfg(base_url = "prod")]
-const BASE_URL: &'static str = "http://localhost:3000";
+#[cfg(base_url = "public")]
+const BASE_URL: &'static str = "https://rust-everywhere-api.logankeenan.com";
 
-#[cfg(not(my_var = "prod"))]
+#[cfg(not(my_var = "public"))]
 const BASE_URL: &'static str = "http://localhost:3000";
 
 pub struct NotesService {
