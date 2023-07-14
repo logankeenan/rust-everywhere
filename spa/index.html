@@ -8,10 +8,22 @@
 </body>
 <script>
     if ('serviceWorker' in navigator) {
-        window.addEventListener('load', function() {
-            navigator.serviceWorker.register('/sw.js').then(function(registration) {
+        window.addEventListener('load', function () {
+            navigator.serviceWorker.register('/sw.js').then(function (registration) {
                 console.log('ServiceWorker registration successful with scope: ', registration.scope);
-            }, function(err) {
+
+                // I want to reload the page the first time the SW is installed. That way it'll
+                // proxy the request through the worker, therefore, the Rust app.
+                const installKey = 'swInstalled';
+                if (!localStorage.getItem(installKey)) {
+                    localStorage.setItem(installKey, 'true');
+                    // Calling reload right away doesn't work even though the SW
+                    // says it's installed.
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 200);
+                }
+            }, function (err) {
                 // registration failed :(
                 console.log('ServiceWorker registration failed: ', err);
             });

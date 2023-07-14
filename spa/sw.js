@@ -3,8 +3,13 @@ let wasmModule;
 
 importScripts("/dist/wasm/spa.js")
 self.addEventListener('install', (event) => {
-    event.waitUntil(wasm_bindgen("/dist/wasm/spa_bg.wasm"));
+    event.waitUntil(loadWasmModule());
 });
+
+async function loadWasmModule() {
+    return wasm_bindgen("/dist/wasm/spa_bg.wasm");
+}
+
 async function wasmResponseToJsResponse(wasmResponse) {
     const body = wasmResponse.body;
     const status = parseInt(wasmResponse.status_code);
