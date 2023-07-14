@@ -7,6 +7,7 @@ use axum::Router;
 use sqlx::{Pool, Sqlite, sqlite::SqlitePoolOptions};
 use std::net::SocketAddr;
 use axum::routing::get;
+use flexi_logger::{Cleanup, Criterion, FileSpec, Logger, Naming};
 use sqlx::migrate::MigrateDatabase;
 use crate::notes_routes::notes_routes;
 
@@ -21,6 +22,16 @@ async fn root() -> &'static str {
 
 #[tokio::main]
 async fn main() -> Result<(), sqlx::Error> {
+    Logger::try_with_str("info").unwrap()
+        .log_to_file(
+            FileSpec::default()
+        )
+        .rotate(Criterion::Size(10000000),
+                Naming::Timestamps,
+                Cleanup::KeepLogFiles(7),
+        )
+        .start().unwrap();
+
     let db_location = "./sqlite.db";
 
     if !Sqlite::database_exists(db_location).await? {

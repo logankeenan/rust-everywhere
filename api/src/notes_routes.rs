@@ -10,9 +10,11 @@ use crate::AppState;
 use crate::axum_extractors::UserId;
 use crate::note_service::NoteService;
 use serde::Deserialize;
+use sqlx::Error;
 use tokio::time::sleep;
 use uuid::Uuid;
 use validator::{Validate};
+use log::{error};
 
 pub fn notes_routes(state: AppState) -> Router<AppState, Body> {
     Router::new()
@@ -41,12 +43,18 @@ async fn all(note_service: NoteService,
     if let Some(query) = &search_query.q {
         match note_service.search_notes(user_id.0, query.clone()).await {
             Ok(notes) => (StatusCode::OK, Json(notes)).into_response(),
-            Err(_) => (StatusCode::INTERNAL_SERVER_ERROR).into_response(),
+            Err(error) => {
+                error!("line: {:?}, error: {:?}", line!(), error);
+                (StatusCode::INTERNAL_SERVER_ERROR).into_response()
+            },
         }
     } else {
         match note_service.all_notes(user_id.0).await {
             Ok(notes) => (StatusCode::OK, Json(notes)).into_response(),
-            Err(_) => (StatusCode::INTERNAL_SERVER_ERROR).into_response(),
+            Err(error) => {
+                error!("line: {:?}, error: {:?}", line!(), error);
+                (StatusCode::INTERNAL_SERVER_ERROR).into_response()
+            },
         }
     }
 }
@@ -56,7 +64,17 @@ async fn by_id(note_service: NoteService,
                user_id: UserId) -> Response {
     match note_service.by_id(id, user_id.0).await {
         Ok(note) => (StatusCode::OK, Json(note)).into_response(),
-        Err(_) => (StatusCode::INTERNAL_SERVER_ERROR).into_response(),
+        Err(err) => {
+            match err {
+                Error::RowNotFound => {
+                    (StatusCode::NOT_FOUND).into_response()
+                }
+                error => {
+                    error!("line: {:?}, error: {:?}", line!(), error);
+                    (StatusCode::INTERNAL_SERVER_ERROR).into_response()
+                }
+            }
+        },
     }
 }
 
@@ -71,10 +89,15 @@ async fn create(note_service: NoteService,
 
                     (StatusCode::CREATED, Json(note)).into_response()
                 }
-                Err(_) => (StatusCode::INTERNAL_SERVER_ERROR).into_response(),
+                Err(error) => {
+                    error!("line: {:?}, error: {:?}", line!(), error);
+                    (StatusCode::INTERNAL_SERVER_ERROR).into_response()
+                },
             }
         }
-        Err(errors) => (StatusCode::INTERNAL_SERVER_ERROR, errors.to_string()).into_response()
+        Err(errors) => {
+            (StatusCode::BAD_REQUEST, errors.to_string()).into_response()
+        }
     }
 }
 
@@ -83,7 +106,7 @@ fn delete_note_after_15_mins(cloned_service: NoteService, note_id: i64, user_id:
         sleep(Duration::from_secs(15 * 60)).await;
         match cloned_service.delete_by_id(note_id, user_id).await {
             Ok(_) => (),
-            Err(_) => eprintln!("Error deleting note after 15 minutes"),
+            Err(_) => error!("Error deleting note after 15 minutes"),
         }
     });
 }
@@ -101,10 +124,13 @@ async fn update(note_service: NoteService,
 
                     (StatusCode::NO_CONTENT, headers).into_response()
                 }
-                Err(_) => (StatusCode::INTERNAL_SERVER_ERROR).into_response(),
+                Err(error) => {
+                    error!("line: {:?}, error: {:?}", line!(), error);
+                    (StatusCode::INTERNAL_SERVER_ERROR).into_response()
+                },
             }
         }
-        Err(errors) => (StatusCode::INTERNAL_SERVER_ERROR, errors.to_string()).into_response()
+        Err(errors) => (StatusCode::BAD_REQUEST, errors.to_string()).into_response()
     }
 }
 
