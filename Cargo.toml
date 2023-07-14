@@ -3,5 +3,6 @@
 members = [
     "api",
     "app",
-    "server-side"
+    "server-side",
+    "spa"
 ]
