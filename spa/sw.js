@@ -4,9 +4,7 @@ self.addEventListener('install', (event) => {
 });
 
 function setCookie(value) {
-    return caches.open('my-cache').then((cache) => {
-        return cache.put('cookie', new Response(value));
-    });
+    return caches.open('my-cache').then((cache) => cache.put('cookie', new Response(value)));
 }
 
 function getCookie() {
@@ -41,6 +39,7 @@ async function requestToWasmRequest(request) {
     const url = request.url;
     const headers = Object.fromEntries(request.headers.entries());
 
+
     let cookie = await getCookie();
     if (cookie) {
         headers["Cookie"] = cookie;
@@ -55,21 +54,24 @@ async function requestToWasmRequest(request) {
 }
 
 self.addEventListener('fetch', async event => {
-    let url = new URL(event.request.url);
+    const url = new URL(event.request.url);
     if (url.host === "localhost:4000") {
         event.respondWith((async () => {
             try {
                 const request = event.request;
-                let {app, wasmRequest} = await requestToWasmRequest(request);
-                let wasmResponse = await app(wasmRequest);
+                const {app, wasmRequest} = await requestToWasmRequest(request);
+                const wasmResponse = await app(wasmRequest);
 
-                let cookieValue = wasmResponse.headers['set-cookie'];
+                // The response has a set-cookie header. However, you can't construct
+                // a Response clients-side with set-cookie and expect the cookie to be
+                // set in the browser.  We'll pull off the value and set the Cookie
+                // on subsequent requests
+                const cookieValue = wasmResponse.headers['set-cookie'];
                 if (cookieValue) {
                     await setCookie(cookieValue)
                 }
 
-                let response = await wasmResponseToJsResponse(wasmResponse);
-                return response;
+                return wasmResponseToJsResponse(wasmResponse);
 
             } catch (error) {
                 console.error("error querying wasm app for result", {error, event});

@@ -16,6 +16,7 @@ use crate::{
 use validator::{Validate};
 use crate::axum_extractors::UserId;
 use axum_cloudflare_adapter_macros::worker_route_compat;
+use http::header::CONTENT_TYPE;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct NoteListItem {
@@ -142,6 +143,7 @@ pub async fn create_note(
 
         Response::builder()
             .status(200)
+            .header(CONTENT_TYPE, "text/html")
             .body(html.into())
             .unwrap()
     } else {
@@ -216,11 +218,13 @@ pub async fn show_note(
 
         Response::builder()
             .status(200)
+            .header(CONTENT_TYPE, "text/html")
             .body(html.into())
             .unwrap()
     } else {
         Response::builder()
             .status(404)
+            .header(CONTENT_TYPE, "text/html")
             .body(Body::from("Note not found"))
             .unwrap()
     }
@@ -255,11 +259,13 @@ pub async fn edit_note(
 
         Response::builder()
             .status(200)
+            .header(CONTENT_TYPE, "text/html")
             .body(html.into())
             .unwrap()
     } else {
         Response::builder()
             .status(404)
+            .header(CONTENT_TYPE, "text/html")
             .body(Body::from("Note not found"))
             .unwrap()
     }
@@ -307,6 +313,7 @@ pub async fn search_note(
 
     Response::builder()
         .status(200)
+        .header(CONTENT_TYPE, "text/html")
         .body(html)
         .unwrap()
 }
