@@ -13,7 +13,9 @@
                 console.log('ServiceWorker registration successful with scope: ', registration.scope);
 
                 // I want to reload the page the first time the SW is installed. That way it'll
-                // proxy the request through the worker, therefore, the Rust app.
+                // proxy the request through the worker, therefore, the Rust app. This isn't
+                // very efficient and there's probably a better way to do this, but it
+                // works for now.
                 const installKey = 'swInstalled';
                 if (!localStorage.getItem(installKey)) {
                     localStorage.setItem(installKey, 'true');

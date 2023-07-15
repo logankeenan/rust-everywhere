@@ -1,10 +1,22 @@
-// In your service worker
-let wasmModule;
-
 importScripts("/dist/wasm/spa.js")
 self.addEventListener('install', (event) => {
     event.waitUntil(loadWasmModule());
 });
+
+function setCookie(value) {
+    return caches.open('my-cache').then((cache) => {
+        return cache.put('cookie', new Response(value));
+    });
+}
+
+function getCookie() {
+    return caches.open('my-cache').then((cache) => {
+        return cache.match('cookie').then((response) => {
+            return response ? response.text() : null;
+        });
+    });
+}
+
 
 async function loadWasmModule() {
     return wasm_bindgen("/dist/wasm/spa_bg.wasm");
@@ -29,6 +41,11 @@ async function requestToWasmRequest(request) {
     const url = request.url;
     const headers = Object.fromEntries(request.headers.entries());
 
+    let cookie = await getCookie();
+    if (cookie) {
+        headers["Cookie"] = cookie;
+    }
+
     let body = null;
     if (request.body !== null) {
         body = await request.text();
@@ -46,11 +63,16 @@ self.addEventListener('fetch', async event => {
                 let {app, wasmRequest} = await requestToWasmRequest(request);
                 let wasmResponse = await app(wasmRequest);
 
+                let cookieValue = wasmResponse.headers['set-cookie'];
+                if (cookieValue) {
+                    await setCookie(cookieValue)
+                }
+
                 let response = await wasmResponseToJsResponse(wasmResponse);
                 return response;
 
             } catch (error) {
-                console.error("error querying wasm app for result", { error, event });
+                console.error("error querying wasm app for result", {error, event});
             }
         })());
     }
