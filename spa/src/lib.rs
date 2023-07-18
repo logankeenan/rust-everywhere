@@ -5,6 +5,7 @@ use axum::http;
 use axum::response::Response;
 use axum::http::{Method, Request, Uri};
 use serde::{Deserialize, Serialize};
+use serde_wasm_bindgen::{from_value, to_value};
 use wasm_bindgen::prelude::*;
 use tower_service::Service;
 use app::create_app;
@@ -26,7 +27,9 @@ pub struct WasmRequest {
 impl WasmRequest {
     #[wasm_bindgen(constructor)]
     pub fn new(method: String, url: String, headers_js_value: JsValue, body: Option<String>) -> WasmRequest {
-        let headers: HashMap<String, String> = headers_js_value.into_serde().unwrap();
+
+
+        let headers: HashMap<String, String> = from_value(headers_js_value).unwrap();
 
         WasmRequest { method, url, headers, body }
     }
@@ -53,7 +56,7 @@ impl WasmRequest {
 
     #[wasm_bindgen(getter)]
     pub fn headers(&self) -> JsValue {
-        JsValue::from_serde(&self.headers).unwrap()
+        to_value(&self.headers).unwrap()
     }
 
     pub fn headers_append(&mut self, key: String, value: String) {
@@ -109,7 +112,7 @@ impl WasmResponse {
 
     #[wasm_bindgen(getter)]
     pub fn headers(&self) -> JsValue {
-        JsValue::from_serde(&self.headers).unwrap()
+        to_value(&self.headers).unwrap()
     }
 }
 
