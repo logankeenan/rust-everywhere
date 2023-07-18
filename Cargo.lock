@@ -201,10 +201,8 @@ dependencies = [
 name = "axum-cloudflare-adapter-macros"
 version = "0.1.1"
 dependencies = [
- "oneshot",
  "quote",
  "syn 2.0.25",
- "wasm-bindgen-futures",
 ]
 
 [[package]]
@@ -766,7 +764,7 @@ dependencies = [
  "indexmap",
  "slab",
  "tokio 0.2.25",
- "tokio-util",
+ "tokio-util 0.3.1",
  "tracing",
  "tracing-futures",
 ]
@@ -1952,6 +1950,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "spa-server"
+version = "0.1.0"
+dependencies = [
+ "app",
+ "axum",
+ "tokio 1.28.2",
+ "tower-http",
+]
+
+[[package]]
 name = "spin"
 version = "0.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2418,6 +2426,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "tokio-util"
+version = "0.7.8"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "806fe8c2c87eccc8b3267cbae29ed3ab2d0bd37fca70ab622e46aaa9375ddb7d"
+dependencies = [
+ "bytes 1.4.0",
+ "futures-core",
+ "futures-sink",
+ "pin-project-lite 0.2.9",
+ "tokio 1.28.2",
+]
+
+[[package]]
 name = "tower"
 version = "0.4.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2446,9 +2467,16 @@ dependencies = [
  "http",
  "http-body 0.4.5",
  "http-range-header",
+ "httpdate 1.0.2",
+ "mime",
+ "mime_guess",
+ "percent-encoding",
  "pin-project-lite 0.2.9",
+ "tokio 1.28.2",
+ "tokio-util 0.7.8",
  "tower-layer",
  "tower-service",
+ "tracing",
 ]
 
 [[package]]

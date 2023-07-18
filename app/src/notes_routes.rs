@@ -18,6 +18,25 @@ use crate::axum_extractors::UserId;
 use axum_cloudflare_adapter_macros::worker_route_compat;
 use http::header::CONTENT_TYPE;
 
+#[cfg(feature = "spa")]
+const ENABLE_SPA: bool = true;
+
+#[cfg(not(feature = "spa"))]
+const ENABLE_SPA: bool = false;
+
+
+pub struct BaseTemplate {
+    pub enable_spa: bool,
+}
+
+impl Default for BaseTemplate {
+    fn default() -> Self {
+        BaseTemplate {
+            enable_spa: ENABLE_SPA,
+        }
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct NoteListItem {
     pub id: i64,
@@ -73,6 +92,7 @@ impl NoteForm {
 pub struct IndexTemplate {
     pub note_list: Vec<NoteListItem>,
     pub note_form: NoteForm,
+    pub base_template: BaseTemplate,
 }
 
 fn content_to_markdown(content: &str) -> String {
@@ -120,6 +140,7 @@ pub async fn index(
     IndexTemplate {
         note_list: notes.iter().map(NoteListItem::from).collect(),
         note_form: NoteForm::default(),
+        base_template: Default::default(),
     }
 }
 
@@ -137,6 +158,7 @@ pub async fn create_note(
         let index_template = IndexTemplate {
             note_list: notes.iter().map(NoteListItem::from).collect(),
             note_form,
+            base_template: Default::default(),
         };
 
         let html = index_template.render().unwrap();
@@ -175,6 +197,7 @@ pub async fn update_note(
         let index_template = IndexTemplate {
             note_list: notes.iter().map(NoteListItem::from).collect(),
             note_form,
+            base_template: Default::default(),
         };
 
         let html = index_template.render().unwrap();
@@ -212,6 +235,7 @@ pub async fn show_note(
             note_list: notes.iter().map(NoteListItem::from).collect(),
             preview,
             selected_note: note,
+            base_template: Default::default(),
         };
 
         let html: String = show_template.render().unwrap();
@@ -237,6 +261,7 @@ pub struct ShowTemplate {
     pub note_list: Vec<NoteListItem>,
     pub preview: String,
     pub selected_note: Note,
+    pub base_template: BaseTemplate,
 }
 
 
@@ -253,6 +278,7 @@ pub async fn edit_note(
         let show_template = EditTemplate {
             note_list: notes.iter().map(NoteListItem::from).collect(),
             note_form: NoteForm::from(&note),
+            base_template: Default::default(),
         };
 
         let html: String = show_template.render().unwrap();
@@ -276,6 +302,7 @@ pub async fn edit_note(
 pub struct EditTemplate {
     pub note_list: Vec<NoteListItem>,
     pub note_form: NoteForm,
+    pub base_template: BaseTemplate,
 }
 
 
@@ -308,6 +335,7 @@ pub async fn search_note(
         note_list: notes.iter().map(NoteListItem::from).collect(),
         filtered_notes,
         search,
+        base_template: Default::default(),
     };
     let html = search_template.render().unwrap();
 
@@ -330,5 +358,6 @@ pub struct SearchTemplate {
     pub note_list: Vec<NoteListItem>,
     pub filtered_notes: Vec<NoteSearchPreview>,
     pub search: String,
+    pub base_template: BaseTemplate,
 }
 

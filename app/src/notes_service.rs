@@ -7,7 +7,7 @@ use http::header::HeaderValue;
 #[cfg(base_url = "public")]
 const BASE_URL: &'static str = "https://rust-everywhere-api.logankeenan.com";
 
-#[cfg(not(my_var = "public"))]
+#[cfg(not(base_url = "public"))]
 const BASE_URL: &'static str = "http://localhost:3000";
 
 pub struct NotesService {

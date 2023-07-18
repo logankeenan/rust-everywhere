@@ -58,7 +58,8 @@ async fn main() -> Result<(), sqlx::Error> {
             CorsLayer::new()
                 .allow_methods(Any)
                 .allow_origin([
-                    "http://localhost:4000".parse().unwrap()
+                    "http://localhost:3002".parse().unwrap(),
+                    "https://rust-everywhere-spa.com".parse().unwrap()
                 ])
                 .allow_headers(Any)
         )

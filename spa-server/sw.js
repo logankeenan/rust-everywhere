@@ -3,6 +3,10 @@ self.addEventListener('install', (event) => {
     event.waitUntil(loadWasmModule());
 });
 
+self.addEventListener('activate', event => {
+    event.waitUntil(self.clients.claim());
+});
+
 function setCookie(value) {
     return caches.open('my-cache').then((cache) => cache.put('cookie', new Response(value)));
 }
@@ -55,7 +59,8 @@ async function requestToWasmRequest(request) {
 
 self.addEventListener('fetch', async event => {
     const url = new URL(event.request.url);
-    if (url.host === "localhost:4000") {
+    console.log('url: ', url);
+    if (url.host === "localhost:3002") {
         event.respondWith((async () => {
             try {
                 const request = event.request;
