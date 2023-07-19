@@ -59,7 +59,8 @@ async fn main() -> Result<(), sqlx::Error> {
                 .allow_methods(Any)
                 .allow_origin([
                     "http://localhost:3002".parse().unwrap(),
-                    "https://rust-everywhere-spa.com".parse().unwrap()
+                    "http://localhost:4000".parse().unwrap(),
+                    "https://rust-everywhere-spa.logankeenan.com".parse().unwrap()
                 ])
                 .allow_headers(Any)
         )

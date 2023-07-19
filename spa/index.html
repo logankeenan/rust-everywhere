@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+</body>
+<script>
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+            navigator.serviceWorker.register('/sw.js').then(function (registration) {
+                console.log('ServiceWorker registration successful with scope: ', registration.scope);
+
+                registration.onupdatefound = () => {
+                    const installingWorker = registration.installing;
+                    installingWorker.onstatechange = () => {
+                        if (installingWorker.state === 'installed') {
+
+                            // I want to reload the page the first time the SW is installed. That way it'll
+                            // proxy the request through the worker, therefore, the Rust app. This isn't
+                            // very efficient.  Ideally, the page would be rendered server-side and then
+                            // the client-side app starts
+                            const installKey = 'swInstalled';
+                            if (!localStorage.getItem(installKey)) {
+                                localStorage.setItem(installKey, 'true');
+                                // Calling reload right away doesn't work even though the SW
+                                // says it's installed.
+                                window.location.reload();
+                            }
+                        }
+                    };
+                };
+            }, function (err) {
+                console.log('ServiceWorker registration failed: ', err);
+            });
+        });
+    }
+</script>
+</html>

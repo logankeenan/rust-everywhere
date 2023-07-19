@@ -24,7 +24,7 @@ reqwest = { version = "0.10", default-features = false, features = ["json", "rus
 #reqwest = { version = "0.11.18", default-features = false, features = ["json", "rustls-tls"] }
 http = "0.2"
 
-axum-cloudflare-adapter-macros = { version = "0.1.1", path = '../../axum-cloudflare-adapter/macros' }
+axum-cloudflare-adapter-macros = { version = "0.1.1" }
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 wasm-bindgen-futures = "0.4.37"
 oneshot = "0.1.5"

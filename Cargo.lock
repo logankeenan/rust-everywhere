@@ -200,6 +200,8 @@ dependencies = [
 [[package]]
 name = "axum-cloudflare-adapter-macros"
 version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3d9a658465405d004e46a8d4f31933d3986eab7cc636dbb7a223db1f6006e0a6"
 dependencies = [
  "quote",
  "syn 2.0.25",

@@ -1,4 +1,5 @@
-importScripts("/dist/wasm/spa.js")
+importScripts("/dist/wasm/spa.js");
+
 self.addEventListener('install', (event) => {
     event.waitUntil(loadWasmModule());
 });
@@ -29,10 +30,8 @@ async function wasmResponseToJsResponse(wasmResponse) {
     const status = parseInt(wasmResponse.status_code);
     let jsHeaders = new Headers();
     let headers = wasmResponse.headers;
-    for (const key in headers) {
-        if (headers.hasOwnProperty(key)) {
-            jsHeaders.append(key, headers[key]);
-        }
+    for (let [key, value] of headers) {
+        jsHeaders.append(key, value);
     }
     return new Response(body, {status: status, headers: jsHeaders});
 }
@@ -60,7 +59,7 @@ async function requestToWasmRequest(request) {
 self.addEventListener('fetch', async event => {
     const url = new URL(event.request.url);
     console.log('url: ', url);
-    if (url.host === "localhost:3001") {
+    if (url.host === "localhost:4000") {
         event.respondWith((async () => {
             try {
                 const request = event.request;
