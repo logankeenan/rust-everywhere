@@ -28,8 +28,8 @@ async function loadWasmModule() {
 async function wasmResponseToJsResponse(wasmResponse) {
     const body = wasmResponse.body;
     const status = parseInt(wasmResponse.status_code);
-    let jsHeaders = new Headers();
-    let headers = wasmResponse.headers;
+    const jsHeaders = new Headers();
+    const headers = wasmResponse.headers;
     for (let [key, value] of headers) {
         jsHeaders.append(key, value);
     }
@@ -37,13 +37,13 @@ async function wasmResponseToJsResponse(wasmResponse) {
 }
 
 async function requestToWasmRequest(request) {
-    const {app, WasmRequest} = wasm_bindgen;
+    const {WasmRequest} = wasm_bindgen;
     const method = request.method;
     const url = request.url;
     const headers = Object.fromEntries(request.headers.entries());
 
 
-    let cookie = await getCookie();
+    const cookie = await getCookie();
     if (cookie) {
         headers["Cookie"] = cookie;
     }
@@ -52,25 +52,24 @@ async function requestToWasmRequest(request) {
     if (request.body !== null) {
         body = await request.text();
     }
-    let wasmRequest = new WasmRequest(method, url, headers, body);
-    return {app, wasmRequest};
+    return new WasmRequest(method, url, headers, body);
 }
 
 self.addEventListener('fetch', async event => {
     const url = new URL(event.request.url);
-    console.log('url: ', url);
     if (url.host === "localhost:4000") {
         event.respondWith((async () => {
             try {
+                const {app} = wasm_bindgen;
                 const request = event.request;
-                const {app, wasmRequest} = await requestToWasmRequest(request);
+                const wasmRequest = await requestToWasmRequest(request);
                 const wasmResponse = await app(wasmRequest);
 
                 // The response has a set-cookie header. However, you can't construct
                 // a Response clients-side with set-cookie and expect the cookie to be
                 // set in the browser.  We'll pull off the value and set the Cookie
                 // on subsequent requests
-                const cookieValue = wasmResponse.headers['set-cookie'];
+                const cookieValue = wasmResponse.headers.get('set-cookie');
                 if (cookieValue) {
                     await setCookie(cookieValue)
                 }

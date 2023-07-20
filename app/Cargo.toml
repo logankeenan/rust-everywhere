@@ -8,7 +8,7 @@ edition = "2021"
 [dependencies]
 serde_json = "1.0.67"
 tower-service = "0.3.2"
-axum = { version = "0.6.7", default-features = false, features = ["form", "query", "macros"] }
+axum = { version = "0.6.19", default-features = false, features = ["form", "query", "macros"] }
 askama_axum = "0.3.0"
 askama = "0.12.0"
 uuid = { version = "1.3.0", features = ["js", "serde", "v4"] }
@@ -24,7 +24,7 @@ reqwest = { version = "0.10", default-features = false, features = ["json", "rus
 #reqwest = { version = "0.11.18", default-features = false, features = ["json", "rustls-tls"] }
 http = "0.2"
 
-axum-cloudflare-adapter-macros = { version = "0.1.1" }
+axum-wasm-macros = { version = "0.1.1" }
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 wasm-bindgen-futures = "0.4.37"
 oneshot = "0.1.5"

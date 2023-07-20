@@ -77,8 +77,8 @@ dependencies = [
  "askama",
  "askama_axum",
  "axum",
- "axum-cloudflare-adapter-macros",
  "axum-extra",
+ "axum-wasm-macros",
  "cookie",
  "http",
  "oneshot",
@@ -166,9 +166,9 @@ checksum = "d468802bab17cbc0cc575e9b053f41e72aa36bfa6b7f55e3529ffa43161b97fa"
 
 [[package]]
 name = "axum"
-version = "0.6.18"
+version = "0.6.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f8175979259124331c1d7bf6586ee7e0da434155e4b2d48ec2c8386281d8df39"
+checksum = "a6a1de45611fdb535bfde7b7de4fd54f4fd2b17b1737c0a59b69bf9b92074b8c"
 dependencies = [
  "async-trait",
  "axum-core",
@@ -198,13 +198,17 @@ dependencies = [
 ]
 
 [[package]]
-name = "axum-cloudflare-adapter-macros"
-version = "0.1.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3d9a658465405d004e46a8d4f31933d3986eab7cc636dbb7a223db1f6006e0a6"
+name = "axum-browser-adapter"
+version = "0.1.0"
 dependencies = [
- "quote",
- "syn 2.0.25",
+ "axum",
+ "axum-wasm-macros",
+ "futures",
+ "http-body 0.4.5",
+ "serde",
+ "serde-wasm-bindgen",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
 ]
 
 [[package]]
@@ -249,12 +253,22 @@ dependencies = [
 
 [[package]]
 name = "axum-macros"
-version = "0.3.7"
+version = "0.3.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2bb524613be645939e280b7279f7b017f98cf7f5ef084ec374df373530e73277"
+checksum = "cdca6a10ecad987bda04e95606ef85a5417dcaac1a78455242d72e031e2b6b62"
 dependencies = [
  "heck",
  "proc-macro2",
+ "quote",
+ "syn 2.0.25",
+]
+
+[[package]]
+name = "axum-wasm-macros"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0dfe0ef4d87508fe225ee82b96f0413a4b928b11537e07999d5a2f5825127706"
+dependencies = [
  "quote",
  "syn 2.0.25",
 ]
@@ -1953,11 +1967,7 @@ name = "spa"
 version = "0.1.0"
 dependencies = [
  "app",
- "axum",
- "futures",
- "http-body 0.4.5",
- "serde",
- "serde-wasm-bindgen",
+ "axum-browser-adapter",
  "tower-service",
  "wasm-bindgen",
  "wasm-bindgen-futures",

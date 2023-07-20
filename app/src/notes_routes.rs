@@ -15,7 +15,7 @@ use crate::{
 
 use validator::{Validate};
 use crate::axum_extractors::UserId;
-use axum_cloudflare_adapter_macros::worker_route_compat;
+use axum_wasm_macros::wasm_compat;
 use http::header::CONTENT_TYPE;
 
 #[cfg(feature = "spa")]
@@ -130,7 +130,7 @@ fn first_20_chars(markdown_input: &str) -> String {
     plain_text
 }
 
-#[worker_route_compat]
+#[wasm_compat]
 pub async fn index(
     user_id: UserId,
     note_service: NotesService,
@@ -144,7 +144,7 @@ pub async fn index(
     }
 }
 
-#[worker_route_compat]
+#[wasm_compat]
 pub async fn create_note(
     user_id: UserId,
     note_service: NotesService,
@@ -184,7 +184,7 @@ pub async fn create_note(
     }
 }
 
-#[worker_route_compat]
+#[wasm_compat]
 pub async fn update_note(
     user_id: UserId,
     note_service: NotesService,
@@ -219,7 +219,7 @@ pub async fn update_note(
     }
 }
 
-#[worker_route_compat]
+#[wasm_compat]
 pub async fn show_note(
     Path(id): Path<i64>,
     user_id: UserId,
@@ -265,7 +265,7 @@ pub struct ShowTemplate {
 }
 
 
-#[worker_route_compat]
+#[wasm_compat]
 pub async fn edit_note(
     Path(id): Path<i64>,
     user_id: UserId,
@@ -311,7 +311,7 @@ pub struct SearchQuery {
     search: String,
 }
 
-#[worker_route_compat]
+#[wasm_compat]
 pub async fn search_note(
     Query(SearchQuery { search }): Query<SearchQuery>,
     user_id: UserId,

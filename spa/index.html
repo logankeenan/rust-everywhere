@@ -24,8 +24,6 @@
                             const installKey = 'swInstalled';
                             if (!localStorage.getItem(installKey)) {
                                 localStorage.setItem(installKey, 'true');
-                                // Calling reload right away doesn't work even though the SW
-                                // says it's installed.
                                 window.location.reload();
                             }
                         }
