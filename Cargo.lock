@@ -200,6 +200,8 @@ dependencies = [
 [[package]]
 name = "axum-browser-adapter"
 version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2f00798d88c7bd703df0964776ae48f2eb9b52c8985a11fe5dc820c76710e0fa"
 dependencies = [
  "axum",
  "axum-wasm-macros",
