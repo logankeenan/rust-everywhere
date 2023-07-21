@@ -20,8 +20,8 @@ axum-extra = { version = "0.7.2", features = ["cookie"] }
 
 # https://github.com/seanmonstar/reqwest/issues/1600
 # This version is needed for WASM for now
-reqwest = { version = "0.10", default-features = false, features = ["json", "rustls-tls"] }
-#reqwest = { version = "0.11.18", default-features = false, features = ["json", "rustls-tls"] }
+#reqwest = { version = "0.10", default-features = false, features = ["json", "rustls-tls"] }
+reqwest = { version = "0.11.18", default-features = false, features = ["json", "rustls-tls"] }
 http = "0.2"
 
 axum-wasm-macros = { version = "0.1.1" }

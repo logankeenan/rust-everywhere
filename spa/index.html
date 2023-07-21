@@ -24,7 +24,9 @@
                             const installKey = 'swInstalled';
                             if (!localStorage.getItem(installKey)) {
                                 localStorage.setItem(installKey, 'true');
-                                window.location.reload();
+                                setTimeout(function (){
+                                    window.location.reload();
+                                }, 300)
                             }
                         }
                     };
