@@ -1,4 +1,4 @@
-importScripts("/dist/wasm/spa.js")
+importScripts("/dist/wasm/spa.js", "/dist/axum-browser-adapter/index.js");
 self.addEventListener('install', (event) => {
     event.waitUntil(loadWasmModule());
 });
@@ -24,45 +24,20 @@ async function loadWasmModule() {
     return wasm_bindgen("/dist/wasm/spa_bg.wasm");
 }
 
-async function wasmResponseToJsResponse(wasmResponse) {
-    const body = wasmResponse.body;
-    const status = parseInt(wasmResponse.status_code);
-    const jsHeaders = new Headers();
-    const headers = wasmResponse.headers;
-    for (let [key, value] of headers) {
-        jsHeaders.append(key, value);
-    }
-    return new Response(body, {status: status, headers: jsHeaders});
-}
-
-async function requestToWasmRequest(request) {
-    const {WasmRequest} = wasm_bindgen;
-    const method = request.method;
-    const url = request.url;
-    const headers = Object.fromEntries(request.headers.entries());
-
-
-    const cookie = await getCookie();
-    if (cookie) {
-        headers["Cookie"] = cookie;
-    }
-
-    let body = null;
-    if (request.body !== null) {
-        body = await request.text();
-    }
-    return new WasmRequest(method, url, headers, body);
-}
-
 self.addEventListener('fetch', async event => {
     const url = new URL(event.request.url);
-    console.log('url: ', url);
     if (url.host === "localhost:3002") {
         event.respondWith((async () => {
             try {
-                const {app} = wasm_bindgen;
+                const {app, WasmRequest} = wasm_bindgen;
                 const request = event.request;
-                const wasmRequest = await requestToWasmRequest(request);
+                const wasmRequest = await requestToWasmRequest(request, WasmRequest);
+
+                const cookie = await getCookie();
+                if (cookie) {
+                    wasmRequest.append_header("Cookie", cookie);
+                }
+
                 const wasmResponse = await app(wasmRequest);
 
                 // The response has a set-cookie header. However, you can't construct
