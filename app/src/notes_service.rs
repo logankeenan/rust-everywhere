@@ -3,11 +3,10 @@ use crate::notes_model::Note;
 use reqwest::Client;
 use http::header::HeaderValue;
 
-
-#[cfg(base_url = "public")]
+#[cfg(feature = "public")]
 const BASE_URL: &'static str = "https://rust-everywhere-api.logankeenan.com";
 
-#[cfg(not(base_url = "public"))]
+#[cfg(not(feature = "public"))]
 const BASE_URL: &'static str = "http://localhost:3000";
 
 pub struct NotesService {

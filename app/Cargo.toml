@@ -32,3 +32,4 @@ oneshot = "0.1.5"
 [features]
 default = []
 spa = []
+public = []
