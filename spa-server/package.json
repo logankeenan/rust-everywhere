@@ -1,0 +1,14 @@
+{
+  "name": "spa-server",
+  "version": "0.0.0",
+  "description": "",
+  "main": "sw.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Logan Keenan",
+  "license": "MIT",
+  "dependencies": {
+    "axum-browser-adapter": "^1.0.0"
+  }
+}

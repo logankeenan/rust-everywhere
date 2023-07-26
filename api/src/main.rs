@@ -10,6 +10,7 @@ use axum::routing::get;
 use flexi_logger::{Cleanup, Criterion, FileSpec, Logger, Naming};
 use sqlx::migrate::MigrateDatabase;
 use crate::notes_routes::notes_routes;
+use tower_http::cors::{Any, CorsLayer};
 
 #[derive(Clone)]
 pub struct AppState {
@@ -53,6 +54,17 @@ async fn main() -> Result<(), sqlx::Error> {
     let app = Router::new()
         .route("/", get(root))
         .merge(notes_routes(state.clone()))
+        .layer(
+            CorsLayer::new()
+                .allow_methods(Any)
+                .allow_origin([
+                    "http://localhost:3002".parse().unwrap(),
+                    "http://localhost:4000".parse().unwrap(),
+                    "https://rust-everywhere-spa-server.logankeenan.com".parse().unwrap(),
+                    "https://rust-everywhere-spa.pages.dev".parse().unwrap()
+                ])
+                .allow_headers(Any)
+        )
         .with_state(state);
 
     let addr = SocketAddr::from(([0, 0, 0, 0], 3000));

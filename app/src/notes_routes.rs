@@ -15,6 +15,27 @@ use crate::{
 
 use validator::{Validate};
 use crate::axum_extractors::UserId;
+use axum_wasm_macros::wasm_compat;
+use http::header::CONTENT_TYPE;
+
+#[cfg(feature = "spa")]
+const ENABLE_SPA: bool = true;
+
+#[cfg(not(feature = "spa"))]
+const ENABLE_SPA: bool = false;
+
+
+pub struct BaseTemplate {
+    pub enable_spa: bool,
+}
+
+impl Default for BaseTemplate {
+    fn default() -> Self {
+        BaseTemplate {
+            enable_spa: ENABLE_SPA,
+        }
+    }
+}
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct NoteListItem {
@@ -71,6 +92,7 @@ impl NoteForm {
 pub struct IndexTemplate {
     pub note_list: Vec<NoteListItem>,
     pub note_form: NoteForm,
+    pub base_template: BaseTemplate,
 }
 
 fn content_to_markdown(content: &str) -> String {
@@ -108,6 +130,7 @@ fn first_20_chars(markdown_input: &str) -> String {
     plain_text
 }
 
+#[wasm_compat]
 pub async fn index(
     user_id: UserId,
     note_service: NotesService,
@@ -117,9 +140,11 @@ pub async fn index(
     IndexTemplate {
         note_list: notes.iter().map(NoteListItem::from).collect(),
         note_form: NoteForm::default(),
+        base_template: Default::default(),
     }
 }
 
+#[wasm_compat]
 pub async fn create_note(
     user_id: UserId,
     note_service: NotesService,
@@ -133,12 +158,14 @@ pub async fn create_note(
         let index_template = IndexTemplate {
             note_list: notes.iter().map(NoteListItem::from).collect(),
             note_form,
+            base_template: Default::default(),
         };
 
         let html = index_template.render().unwrap();
 
         Response::builder()
             .status(200)
+            .header(CONTENT_TYPE, "text/html")
             .body(html.into())
             .unwrap()
     } else {
@@ -157,6 +184,7 @@ pub async fn create_note(
     }
 }
 
+#[wasm_compat]
 pub async fn update_note(
     user_id: UserId,
     note_service: NotesService,
@@ -169,6 +197,7 @@ pub async fn update_note(
         let index_template = IndexTemplate {
             note_list: notes.iter().map(NoteListItem::from).collect(),
             note_form,
+            base_template: Default::default(),
         };
 
         let html = index_template.render().unwrap();
@@ -190,6 +219,7 @@ pub async fn update_note(
     }
 }
 
+#[wasm_compat]
 pub async fn show_note(
     Path(id): Path<i64>,
     user_id: UserId,
@@ -205,17 +235,20 @@ pub async fn show_note(
             note_list: notes.iter().map(NoteListItem::from).collect(),
             preview,
             selected_note: note,
+            base_template: Default::default(),
         };
 
         let html: String = show_template.render().unwrap();
 
         Response::builder()
             .status(200)
+            .header(CONTENT_TYPE, "text/html")
             .body(html.into())
             .unwrap()
     } else {
         Response::builder()
             .status(404)
+            .header(CONTENT_TYPE, "text/html")
             .body(Body::from("Note not found"))
             .unwrap()
     }
@@ -228,9 +261,11 @@ pub struct ShowTemplate {
     pub note_list: Vec<NoteListItem>,
     pub preview: String,
     pub selected_note: Note,
+    pub base_template: BaseTemplate,
 }
 
 
+#[wasm_compat]
 pub async fn edit_note(
     Path(id): Path<i64>,
     user_id: UserId,
@@ -243,17 +278,20 @@ pub async fn edit_note(
         let show_template = EditTemplate {
             note_list: notes.iter().map(NoteListItem::from).collect(),
             note_form: NoteForm::from(&note),
+            base_template: Default::default(),
         };
 
         let html: String = show_template.render().unwrap();
 
         Response::builder()
             .status(200)
+            .header(CONTENT_TYPE, "text/html")
             .body(html.into())
             .unwrap()
     } else {
         Response::builder()
             .status(404)
+            .header(CONTENT_TYPE, "text/html")
             .body(Body::from("Note not found"))
             .unwrap()
     }
@@ -264,6 +302,7 @@ pub async fn edit_note(
 pub struct EditTemplate {
     pub note_list: Vec<NoteListItem>,
     pub note_form: NoteForm,
+    pub base_template: BaseTemplate,
 }
 
 
@@ -272,6 +311,7 @@ pub struct SearchQuery {
     search: String,
 }
 
+#[wasm_compat]
 pub async fn search_note(
     Query(SearchQuery { search }): Query<SearchQuery>,
     user_id: UserId,
@@ -295,11 +335,13 @@ pub async fn search_note(
         note_list: notes.iter().map(NoteListItem::from).collect(),
         filtered_notes,
         search,
+        base_template: Default::default(),
     };
     let html = search_template.render().unwrap();
 
     Response::builder()
         .status(200)
+        .header(CONTENT_TYPE, "text/html")
         .body(html)
         .unwrap()
 }
@@ -316,5 +358,6 @@ pub struct SearchTemplate {
     pub note_list: Vec<NoteListItem>,
     pub filtered_notes: Vec<NoteSearchPreview>,
     pub search: String,
+    pub base_template: BaseTemplate,
 }
 

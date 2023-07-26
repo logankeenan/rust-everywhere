@@ -1,28 +1,80 @@
-name: Rust
+name: Rust CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ main ]
   pull_request:
-    branches: [ "main" ]
-
-env:
-  CARGO_TERM_COLOR: always
+    branches: [ main ]
 
 jobs:
   build:
+    runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        project: [api, app, server-side, spa-server]
+        include:
+          - project: api
+            cargo_args: '--verbose'
+            steps_extra: |
+              cargo install sqlx-cli &&
+              . ./sqlx.sh database create &&
+              . ./sqlx.sh migrate run
+          - project: app
+            cargo_args: '--verbose --target wasm32-unknown-unknown'
+            steps_extra: ''
+          - project: server-side
+            cargo_args: '--verbose'
+            steps_extra: ''
+          - project: spa-server
+            cargo_args: '--verbose'
+            steps_extra: ''
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+
+      - name: Add wasm32 target
+        run: rustup target add wasm32-unknown-unknown
+
+      - name: Extra steps
+        run: |
+          cd ${{ matrix.project }}
+          ${{ matrix.steps_extra }}
+
+      - name: Build
+        run: |
+          cd ${{ matrix.project }}
+          cargo build ${{ matrix.cargo_args }}
+
+      - name: Run tests
+        if: matrix.project == 'api'
+        run: |
+          cd ${{ matrix.project }}
+          cargo test ${{ matrix.cargo_args }}
+
+  spa:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
-    - name: Prepare Database
-      run: |
-        cargo install sqlx-cli &&
-        cd api &&
-        . ./sqlx.sh database create &&
-        . ./sqlx.sh migrate run
-    - name: Build
-      run: cargo build --verbose
-    - name: Run tests
-      run: cargo test --verbose
+      - uses: actions/checkout@v3
+      - name: Setup Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+
+      - name: Add wasm32 target
+        run: rustup target add wasm32-unknown-unknown
+
+      - name: Install wasm-bindgen-cli
+        run: cargo install wasm-bindgen-cli
+
+      - name: Run SPA script
+        run: |
+          cd spa
+          . ./scripts/debug.sh
