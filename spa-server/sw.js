@@ -26,7 +26,7 @@ async function loadWasmModule() {
 
 self.addEventListener('fetch', async event => {
     const url = new URL(event.request.url);
-    if (url.host === "localhost:3002") {
+    if (["localhost:3002", "rust-everywhere-spa-server.logankeenan.com"].includes(url.host)) {
         event.respondWith((async () => {
             try {
                 const {app, WasmRequest} = wasm_bindgen;
