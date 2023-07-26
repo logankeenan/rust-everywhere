@@ -1,0 +1,24 @@
+{
+  "name": "axum-browser-adapter",
+  "version": "1.0.0",
+  "description": "Adapters to easily run an Axum server compiled to WASM in the browser",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/logankeenan/axum-browser-adapter.git"
+  },
+  "keywords": [
+    "Axum",
+    "WASM",
+    "browser"
+  ],
+  "author": "Logan Keenan",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/logankeenan/axum-browser-adapter/issues"
+  },
+  "homepage": "https://github.com/logankeenan/axum-browser-adapter#readme"
+}
