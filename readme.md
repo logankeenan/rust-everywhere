@@ -1,6 +1,8 @@
 # Rust Everywhere
 
-A collection of projects experimenting with how to _run_ server-side Rust app in various platforms.
+A collection of projects experimenting with how to _run_ Rust app in various platforms.
+
+## Projects
 
 * app - A basic note-taking application.
 * api - The API which the app communicates with
@@ -11,3 +13,5 @@ subsequent _requests_
 * cloudflare - Server-side implementation running in Cloudflare. Coming soon, see an existing [example](https://github.com/logankeenan/axum-cloudflare-adapter/tree/main).
 * ios/android/desktop - Coming soon with [Tauri](https://tauri.app/)
 
+## Blog Posts
+[Client-Side Server with Rust: A New Approach to UI Development](https:://logankeenan.com/posts/client-side-server-with-rust-a-new-approach-to-ui-developer/#source-code-demos)
