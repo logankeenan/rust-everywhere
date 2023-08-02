@@ -68,6 +68,15 @@ jobs:
           toolchain: stable
           override: true
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm install
+        working-directory: ./spa
+
       - name: Add wasm32 target
         run: rustup target add wasm32-unknown-unknown
 
