@@ -1,7 +1,9 @@
 #!/bin/bash
 
-cd ../spa
 cargo clean
+rm -rf dist
+
+cd ../spa
 . ./scripts/release.sh
 
 cp -r dist ../spa-server
