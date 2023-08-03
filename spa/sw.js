@@ -1,7 +1,10 @@
 importScripts("/dist/wasm/spa.js", "/dist/axum-browser-adapter/index.js");
 
-self.addEventListener('install', (event) => {
+const version = 1;
+
+self.addEventListener('install', async (event) => {
     event.waitUntil(loadWasmModule());
+    await self.skipWaiting();
 });
 
 self.addEventListener('activate', event => {
