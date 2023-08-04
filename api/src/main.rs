@@ -35,17 +35,17 @@ async fn main() -> Result<(), sqlx::Error> {
 
     let db_location = "./sqlite.db";
 
-    if !Sqlite::database_exists(db_location).await? {
-        Sqlite::create_database(db_location).await?
+    if !Sqlite::database_exists(db_location).await.unwrap() {
+        Sqlite::create_database(db_location).await.unwrap()
     }
 
     let pool: Pool<Sqlite> = SqlitePoolOptions::new()
         .max_connections(5)
-        .connect(db_location).await?;
+        .connect(db_location).await.unwrap();
 
     sqlx::migrate!()
         .run(&pool)
-        .await?;
+        .await.unwrap();
 
     let state = AppState {
         pool,
