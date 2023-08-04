@@ -17,7 +17,6 @@ pub fn create_app() -> Router {
         .route("/show/:id", get(show_note))
         .route("/edit/:id", get(edit_note))
         .route("/search", get(search_note))
-        // .nest_service("/dist", ServeDir::new("dist"));
         .layer(middleware::from_fn(set_user_id_cookie));
 
     router

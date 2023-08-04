@@ -24,6 +24,7 @@ const ENABLE_SPA: bool = true;
 #[cfg(not(feature = "spa"))]
 const ENABLE_SPA: bool = false;
 
+const APP_HOST: &str = env!("APP_HOST");
 
 pub struct BaseTemplate {
     pub enable_spa: bool,
@@ -174,7 +175,7 @@ pub async fn create_note(
             user_id.0,
         ).await.unwrap();
 
-        let location = format!("/show/{}", note.id);
+        let location = format!("{}/show/{}", APP_HOST, note.id);
 
         Response::builder()
             .header("Location", location)
@@ -209,7 +210,7 @@ pub async fn update_note(
     } else {
         let note_id = note_form.id.unwrap();
         note_service.update_note(note_form.content, note_id, user_id.0).await.unwrap();
-        let location = format!("/show/{}", note_id);
+        let location = format!("{}/show/{}", APP_HOST, note_id);
 
         Response::builder()
             .header("Location", location)
