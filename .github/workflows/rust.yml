@@ -1,5 +1,8 @@
 name: Rust CI
 
+env:
+  APP_HOST: "https://logankeenan.com"
+
 on:
   push:
     branches: [ main ]
