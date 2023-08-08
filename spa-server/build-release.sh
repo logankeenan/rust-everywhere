@@ -17,5 +17,10 @@ cd ../spa-server
 mkdir -p dist/axum-browser-adapter/
 cp node_modules/axum-browser-adapter/index.js dist/axum-browser-adapter/index.js
 
+# Raspberry pi
+#cargo install cross
+#cross build --target aarch64-unknown-linux-gnu --release
+
+# Digital Ocean
 cargo install cross
-cross build --target aarch64-unknown-linux-gnu --release
+cross build --target x86_64-unknown-linux-gnu --release
