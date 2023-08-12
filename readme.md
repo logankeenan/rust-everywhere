@@ -1,6 +1,6 @@
 # Rust Everywhere
 
-A collection of projects experimenting with how to _run_ Rust app in various platforms.
+A collection of projects experimenting with how to _run_ a Rust app on various platforms.
 
 ## Projects
 
