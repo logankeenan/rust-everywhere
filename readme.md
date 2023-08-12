@@ -14,4 +14,4 @@ subsequent _requests_
 * ios/android/desktop - Coming soon with [Tauri](https://tauri.app/)
 
 ## Blog Posts
-[Client-Side Server with Rust: A New Approach to UI Development](https:://logankeenan.com/posts/client-side-server-with-rust-a-new-approach-to-ui-developer/#source-code-demos)
+[Client-Side Server with Rust: A New Approach to UI Development](https://logankeenan.com/posts/client-side-server-with-rust-a-new-approach-to-ui-development)
