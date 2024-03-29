@@ -15,7 +15,7 @@ jobs:
 
     strategy:
       matrix:
-        project: [api, app, server-side, spa-server]
+        project: [api, app, server-side, spa-service-worker-server]
         include:
           - project: api
             cargo_args: '--verbose'
@@ -29,7 +29,7 @@ jobs:
           - project: server-side
             cargo_args: '--verbose'
             steps_extra: ''
-          - project: spa-server
+          - project: spa-service-worker-server
             cargo_args: '--verbose'
             steps_extra: ''
 
@@ -78,7 +78,7 @@ jobs:
 
       - name: Install dependencies
         run: npm install
-        working-directory: ./spa
+        working-directory: ./spa-service-worker
 
       - name: Add wasm32 target
         run: rustup target add wasm32-unknown-unknown

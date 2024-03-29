@@ -4,7 +4,7 @@ cargo clean
 rm -rf dist
 rm sw.js
 
-cd ../spa
+cd ../spa-service-worker
 
 export APP_HOST="https://rust-everywhere-spa-server.logankeenan.com"
 

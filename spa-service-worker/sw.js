@@ -1,4 +1,4 @@
-importScripts("/dist/wasm/spa.js", "/dist/axum-browser-adapter/index.js");
+importScripts("/dist/wasm/spa-service-worker.js", "/dist/axum-browser-adapter/index.js");
 
 const version = 1;
 
@@ -30,7 +30,7 @@ async function loadWasmModule() {
 
 self.addEventListener('fetch', async event => {
     const url = new URL(event.request.url);
-    if (["rust-everywhere-spa.pages.dev", "localhost:4000", "localhost:3002", "rust-everywhere-spa-server.logankeenan.com"].includes(url.host)) {
+    if (["rust-everywhere-spa-service-worker.pages.dev", "localhost:4000", "localhost:3002", "rust-everywhere-spa-service-worker-server.logankeenan.com"].includes(url.host)) {
         event.respondWith((async () => {
             try {
                 const {app, WasmRequest} = wasm_bindgen;
