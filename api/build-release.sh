@@ -1,5 +1,7 @@
 #!/bin/bash
 
+cargo install sqlx-cli
+
 . ./sqlx.sh database create
 . ./sqlx.sh migrate run
 
